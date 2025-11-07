@@ -96,7 +96,6 @@ public class DataHandle {
     }
     
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
     //linking reviews to their product and linking custmers to thier orders ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
     private void linkReviewsToProducts() {
@@ -165,7 +164,7 @@ public class DataHandle {
     
     
     public void registerNewCustomer(Customer c) {
-        customers.add(c);
+        Customer.add(c);
         System.out.println("New customer registered: " + c.getName());
     }  
     
@@ -203,11 +202,8 @@ public class DataHandle {
 
         for (int i = 0; i < customerOrders.size(); i++) {
             Order o = customerOrders.get(i);
-            System.out.println("- Order ID: " + o.getId() +
-                    " | Products: " + o.getProductList() +
-                    " | Total: " + o.getTotalPrice() +
-                    " | Date: " + o.getOrderDate() +
-                    " | Status: " + o.getStatus());
+            System.out.println("- Order ID: " + o.getId() + "\n- Products: " + o.getProductList() + "\n- Total: " + o.getTotalPrice() +
+                    "\n- Date: " + o.getOrderDate() + "\n- Status: " + o.getStatus());
         }
     }
     
@@ -242,7 +238,7 @@ public class DataHandle {
                 return;
             }
             o.setStatus("Cancelled");
-            orderStack.add(o);//undo
+            orderStack.add(o);//add it to a stack of caceled orders for undoing later
 
             String[] ids = o.getProductList().split(";");//after every cancle we restore the stock of the product
             for (int i = 0; i < ids.length; i++) {
@@ -258,6 +254,29 @@ public class DataHandle {
             System.out.println("Order not found.");
         }
     }
+    
+    public void undoLastCancel() {
+        if (orderStack.size() == 0) {
+            System.out.println("Nothing to undo.");
+            return;
+        }
+
+        Order last = orderStack.remove(orderStack.size() - 1);
+        if ("Cancelled".equalsIgnoreCase(last.getStatus())) {
+            last.setStatus("Pending");
+
+            String[] ids = last.getProductList().split(";"); //change the stock of the product again
+            for (int i = 0; i < ids.length; i++) {
+                String pid = ids[i].trim();
+                Product p = findProductById(pid);
+                if (p != null) p.setStock(p.getStock() - 1);
+            }
+            System.out.println("Undo successful: " + last.getId());
+        } else {
+            System.out.println("Last order was not cancelled.");
+        }
+    }
+
     
     
     public void updateOrderStatus(String orderId, String newStatus) {
@@ -282,12 +301,12 @@ public class DataHandle {
         return null;
     }
     
+    
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   //Review methods: add, edit, average ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    
     
-    
-    
+   
     public void addReview(Review r) {
         reviews.add(r);
         Product p = findProductById(r.getProductId());
@@ -313,9 +332,11 @@ public class DataHandle {
             return 0.0;
         }
     }
+    
 
-	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    //Extra Requirements0^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //Extra Requirements0^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
     
     public void getReviewsByCustomer(String customerId) {
@@ -389,6 +410,7 @@ public class DataHandle {
         if (!found) System.out.println("No common products found with rating > 4 stars.");
     }
     
+
     
     
     
@@ -412,4 +434,3 @@ public class DataHandle {
     
     
 }
-
