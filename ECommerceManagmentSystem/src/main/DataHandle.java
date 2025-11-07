@@ -313,6 +313,82 @@ public class DataHandle {
             return 0.0;
         }
     }
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //Extra Requirements0^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    
+    public void getReviewsByCustomer(String customerId) {
+        System.out.println("Reviews by Customer " + customerId + ":");
+        boolean found = false;
+        for (int i = 0; i < reviews.size(); i++) {
+            Review r = reviews.get(i);
+            if (r.getCustomerId().equals(customerId)) {
+                Product p = findProductById(r.getProductId());
+                System.out.println("- Product: " + p.getName() + "\n- Rating: " + r.getRating() + "\n- Comment: " + r.getComment());
+                found = true;
+            }
+        }
+        if (!found) System.out.println("No reviews found for this customer.");
+    }
+    
+    public void Top3Products() {
+        for (int i = 0; i < products.size(); i++) {
+            Product p = products.get(i);
+            double avg = p.getAverageRating();
+            productPriority.enqueue(p, avg);
+        }
+        System.out.println("Top 3 Products by Rating:");
+        for (int i = 0; i < 3 && !productPriority.isEmpty(); i++) {
+            Product top = productPriority.dequeue();
+            System.out.println((i + 1) + ". " + top.getName() +
+                    " (⭐ " + top.getAverageRating() + ")");
+        }
+    }
+    
+    public void OrdersBetweenDates(String start, String end) {
+        System.out.println("Orders between " + start + " and " + end + ":");
+        boolean found = false;
+        for (int i = 0; i < orders.size(); i++) {
+            Order o = orders.get(i);
+            String date = o.getOrderDate();
+            if (date.compareTo(start) >= 0 && date.compareTo(end) <= 0) {
+                System.out.println("- Order ID: " + o.getId() + "\n- Customer: " + o.getCustomerId() + "\n- Total: " + o.getTotalPrice() +
+                                   "\n- Date: " + date + "\n- Status: " + o.getStatus());
+                found = true;
+            }
+        }
+        if (!found) System.out.println("No orders found between these dates.");
+    }
+    
+    
+    public void HighlyRatedProducts(String c1, String c2) {
+        LinkedList<String> c1Products = new LinkedList<>();
+        LinkedList<String> c2Products = new LinkedList<>();
+
+        for (int i = 0; i < reviews.size(); i++) {
+            Review r = reviews.get(i);
+            if (r.getRating() > 4) {
+                if (r.getCustomerId().equals(c1)) c1Products.add(r.getProductId());
+                else if (r.getCustomerId().equals(c2)) c2Products.add(r.getProductId());
+            }
+        }
+
+        System.out.println("Common Products reviewed > 4 stars by customers " + c1 + " & " + c2 + ":");
+        boolean found = false;
+        for (int i = 0; i < c1Products.size(); i++) {
+            String pid = c1Products.get(i);
+            for (int j = 0; j < c2Products.size(); j++) {
+                if (pid.equals(c2Products.get(j))) {
+                    Product p = findProductById(pid);
+                    System.out.println("- " + (p != null ? p.getName() : pid));
+                    found = true;
+                }
+            }
+        }
+        if (!found) System.out.println("No common products found with rating > 4 stars.");
+    }
+    
     
     
     
@@ -336,3 +412,4 @@ public class DataHandle {
     
     
 }
+
