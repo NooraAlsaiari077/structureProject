@@ -14,20 +14,55 @@ public class Customer {
         this.email = email;
     }
 
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
 
     public void addOrder(Order o) {
     orders.insert(o);
     }
 
-    public LinkedList<Order> getOrders() {
-        return orders;
+    public void showOrders() {
+        if (orders.empty()) {
+            System.out.println("No orders found for this customer.");
+            return;
+        }
+
+        orders.findFirst(); 
+        do {
+            Order o = orders.retrieve();
+            System.out.println("- Order ID: " + o.getId() + " | Total: " + o.getTotalPrice() +" | Date: " + o.getOrderDate() +" | Status: " + o.getStatus());
+            if (!orders.last()){
+                orders.findNext(); 
+            }
+        } while (!orders.last());
     }
+        public String getId() {
+    	return id; 
+    	}
+    
+    public String getName() {
+    	return name; 
+    	}
+    
+    public String getEmail() {
+    	return email;
+    	}
+    
+    public LinkedList<Order> getOrders() { 
+    	return orders; 
+    	}
+
+    public void setName(String name) {
+    	this.name = name; 
+    	}
+    
+    public void setEmail(String email) { 
+    	this.email = email;
+    	}
+
+    
 
     @Override
     public String toString() {
         return "Customer{ ID=" + id + ", Name=" + name + ", Email=" + email + " }";
     }
 }
+
