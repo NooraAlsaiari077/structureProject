@@ -1,0 +1,86 @@
+package linked;
+
+public class LinkedPQ<T> {
+
+   
+    class PQNode<T> {
+        public T data;
+        public float priority;
+        public PQNode<T> next;
+
+        public PQNode() {
+            next = null;
+        }
+
+        public PQNode(T e, float p) {
+            data = e;
+            priority = p;
+            next = null;
+        }
+    }
+
+    private PQNode<T> head;
+    private int size;
+
+    
+    public LinkedPQ() {
+        head = null;
+        size = 0;
+    }
+
+ 
+    public boolean isEmpty() {
+        return head == null;
+    }
+
+    public void enqueue(T e, float pty) {
+        PQNode<T> tmp = new PQNode<>(e, pty);
+
+        if (isEmpty() || pty > head.priority) {
+            tmp.next = head;
+            head = tmp;
+        } else {
+            PQNode<T> p = head;
+            PQNode<T> q = null;
+
+            while (p != null && pty <= p.priority) {
+                q = p;
+                p = p.next;
+            }
+
+            tmp.next = p;
+            q.next = tmp;
+        }
+        size++;
+    }
+
+    
+    public PQElement<T> dequeue() {
+        if (isEmpty())
+            return null;
+
+        PQNode<T> node = head;
+        PQElement<T> pqe = new PQElement<>(node.data, node.priority);
+
+        head = head.next;
+        size--;
+        return pqe;
+    }
+
+    public void print() {
+        if (isEmpty()) {
+            System.out.println("Priority Queue is empty");
+            return;
+        }
+
+        PQNode<T> tmp = head;
+        while (tmp != null) {
+            System.out.println(tmp.data + " (Priority: " + tmp.priority + ")");
+            tmp = tmp.next;
+        }
+    }
+
+    public int size() {
+        return size;
+    }
+}
