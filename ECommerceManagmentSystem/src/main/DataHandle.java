@@ -101,27 +101,38 @@ public class DataHandle {
     private void linkReviewsToProducts() {
         if (reviews.empty()) return;
         reviews.findFirst();
-        do {
+        while (!reviews.last()) {
             Review r = reviews.retrieve();
             Product p = findProductById(r.getProductId());
             if (p != null) {
                 p.getReviews().insert(r);
             }
-            if (!reviews.last()) reviews.findNext();
-        } while (!reviews.last());
+            reviews.findNext(); 
+        }
+        Review r = reviews.retrieve();
+        Product p = findProductById(r.getProductId());
+        if (p != null) {
+            p.getReviews().insert(r);
+        }
     }
+    
 
     private void linkOrdersToCustomers() {
         if (orders.empty()) return;
         orders.findFirst();
-        do {
+        while (!orders.last()) {
             Order o = orders.retrieve();
             Customer c = findCustomerById(o.getCustomerId());
             if (c != null) {
                 c.getOrders().insert(o);
             }
-            if (!orders.last()) orders.findNext();
-        } while (!orders.last());
+            orders.findNext();
+        }
+        Order o = orders.retrieve();
+        Customer c = findCustomerById(o.getCustomerId());
+        if (c != null) {
+            c.getOrders().insert(o);
+        }
     }
     
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -135,23 +146,35 @@ public class DataHandle {
     
     public void removeProduct(String id) {
         if (products.empty()) {
-        	return;
+            System.out.println("No products available.");
+            return;
         }
+
         products.findFirst();
-        do {
+        boolean found = false;
+        while (!products.last()) {
             Product p = products.retrieve();
             if (p.getId().equals(id)) {
                 products.remove();
                 System.out.println("Product removed: " + id);
+                found = true;
                 break;
             }
-            if (!products.last()) { 
-            	products.findNext();
+            products.findNext();
+        }
+        if (!found) {
+            Product p = products.retrieve();
+            if (p.getId().equals(id)) {
+                products.remove();
+                System.out.println("Product removed: " + id);
+                found = true;
             }
-            
-        } while (!products.last());
-        System.out.println("Product not found.");
-    }
+        }
+
+        if (!found) {
+            System.out.println("Product not found: " + id);
+        }
+     }
 
     
     public void updateProduct(String id, double newPrice, int newStock) {
@@ -166,54 +189,50 @@ public class DataHandle {
     
     public Product findProductById(String id) {
         if (products.empty()) {
-        	return null;
+            return null;
         }
         products.findFirst();
-        do {
+        while (!products.last()) { 
             Product p = products.retrieve();
             if (p.getId().equals(id)) {
-            	return p;
+                return p;
             }
-            
-            if (!products.last()) {
-            	products.findNext();
-            }
-            
-        } while (!products.last());
-        
-        return null;
+            products.findNext();  
+        }
+
+        Product p = products.retrieve();
+        if (p.getId().equals(id)) {
+            return p;
+        }
+
+        return null;  
     }
     
     public void showOutOfStock() {
         System.out.println("Out of stock products:");
 
-        if (products.empty()) { 
+        if (products.empty()) {
             System.out.println("No products available.");
             return;
         }
-
         boolean found = false;
-
         products.findFirst();
-        do {
+        while (!products.last()) {  
             Product p = products.retrieve();
             if (p.getStock() <= 0) {
-                System.out.println("- " + p.getName() + " (ID: " + p.getId() + ")");
+                System.out.println("ID: " + p.getId() + ", product name: "+ p.getName() );
                 found = true;
             }
-            if (!products.last()) {
-            	products.findNext(); 
-            }
-        } while (!products.last());
-
+            products.findNext();
+        }
         Product p = products.retrieve();
         if (p.getStock() <= 0) {
-            System.out.println("- " + p.getName() + " (ID: " + p.getId() + ")");
+            System.out.println("ID: " + p.getId() + ", product name: "+ p.getName());
             found = true;
         }
 
         if (!found) {
-        	System.out.println("All products are in stock.");
+            System.out.println("All products are in stock.");
         }
     }
 
@@ -251,37 +270,42 @@ public class DataHandle {
         }
 
         System.out.println("Order History for " + c.getName() + ":");
+        
         LinkedList<Order> list = c.getOrders();
+
         if (list.empty()) {
             System.out.println("No orders found.");
             return;
         }
 
         list.findFirst();
-        do {
+        while (!list.last()) {
             Order o = list.retrieve();
             System.out.println("Order ID: " + o.getId() + " | Status: " + o.getStatus());
-            if (!list.last()) {
-            	list.findNext();
-            }
-        } while (!list.last());
+            list.findNext();
+        }
+        Order o = list.retrieve();
+        System.out.println("Order ID: " + o.getId() + " | Status: " + o.getStatus());
     }
     
     
     public Customer findCustomerById(String id) {
-        if (customers.empty()) return null;
-
-        customers.findFirst(); 
-        do {
+    	if (customers.empty()) {
+            return null;
+        }
+        customers.findFirst();
+        while (!customers.last()) {
             Customer c = customers.retrieve();
             if (c.getId().equals(id)) {
                 return c; 
             }
-            if (!customers.last()) customers.findNext(); 
-        } while (!customers.last());
+            customers.findNext();
+        }
 
         Customer c = customers.retrieve();
-        if (c.getId().equals(id)) return c;
+        if (c.getId().equals(id)) {
+            return c;
+        }
 
         return null; 
     }
@@ -375,13 +399,23 @@ public class DataHandle {
     
     
     public Order findOrderById(String id) {
-        if (orders.empty()) return null;
+        if (orders.empty()) {
+            return null;
+        }
         orders.findFirst();
-        do {
+        while (!orders.last()) {
             Order o = orders.retrieve();
-            if (o.getId().equals(id)) return o;
-            if (!orders.last()) orders.findNext();
-        } while (!orders.last());
+            if (o.getId().equals(id)) {
+                return o;
+            }
+            orders.findNext();
+        }
+
+        Order o = orders.retrieve();
+        if (o.getId().equals(id)) {
+            return o;
+        }
+
         return null;
     }
     
@@ -400,23 +434,38 @@ public class DataHandle {
 
     public void editReview(String id, int newRating, String newText) {
         if (reviews.empty()) {
-        	return;
+            System.out.println("No reviews available.");
+            return;
         }
+
+        boolean found = false;
         reviews.findFirst();
-        do {
+
+        while (!reviews.last()) {
             Review r = reviews.retrieve();
             if (r.getId().equals(id)) {
                 r.setRating(newRating);
                 r.setComment(newText);
                 System.out.println("Review updated: " + id);
+                found = true;
                 break;
             }
-            if (!reviews.last()) {
-            	reviews.findNext();
+            reviews.findNext();
+        }
+
+        if (!found) {
+            Review r = reviews.retrieve();
+            if (r.getId().equals(id)) {
+                r.setRating(newRating);
+                r.setComment(newText);
+                System.out.println("Review updated: " + id);
+                found = true;
             }
-        } while (!reviews.last());
-        System.out.println("Review not found.");
-    }
+        }
+
+        if (!found) {
+            System.out.println("Review not found: " + id);
+        }}
 
 
     public double getAverageRatingForProduct(String pid) {
@@ -437,16 +486,16 @@ public class DataHandle {
     
     public void getReviewsByCustomer(String customerId) {
         System.out.println("Reviews by Customer " + customerId + ":");
-        boolean found = false;
-        if (reviews.empty()) { 
+
+        if (reviews.empty()) {
             System.out.println("No reviews available.");
             return;
         }
 
-        reviews.findFirst(); 
-
-        do {
-            Review r = reviews.retrieve(); 
+        boolean found = false;
+        reviews.findFirst();
+        while (!reviews.last()) {
+            Review r = reviews.retrieve();
 
             if (r.getCustomerId().equals(customerId)) {
                 Product p = findProductById(r.getProductId());
@@ -456,10 +505,8 @@ public class DataHandle {
                 System.out.println("--------------------------------");
                 found = true;
             }
-
-            if (!reviews.last()) reviews.findNext();
-        } while (!reviews.last());
-
+            reviews.findNext();
+        }
         Review r = reviews.retrieve();
         if (r.getCustomerId().equals(customerId)) {
             Product p = findProductById(r.getProductId());
@@ -470,46 +517,81 @@ public class DataHandle {
             found = true;
         }
 
-        if (!found)
+        if (!found) {
             System.out.println("No reviews found for this customer.");
+        }
     }
 
     
     public void Top3Products() {
-        if (products.empty()) return;
+        if (products.empty()) {
+            System.out.println("No products available.");
+            return;
+        }
 
         products.findFirst();
-        do {
+        while (!products.last()) {
             Product p = products.retrieve();
-            double avg = p.getAverageRating();
-            productPriority.enqueue(p, avg); 
-            if (!products.last()) {
-            	products.findNext();
-            }
-        } while (!products.last());
+            float avg = (float) p.getAverageRating();
+            productPriority.enqueue(p, avg);
+            products.findNext();
+        }
 
-        System.out.println("Top 3 Products by Rating:");
+        Product p = products.retrieve();
+        float avg = (float) p.getAverageRating();
+        productPriority.enqueue(p, avg);
+
+
+        System.out.println("Top 3 Products by Rating");
         for (int i = 0; i < 3; i++) {
-            PQElement<Product> top = productPriority.serve();
+            PQElement<Product> top = productPriority.dequeue();
             if (top == null) break;
-            System.out.println("- " + top.data.getName() + " | Rating: " + top.priority);
+            System.out.println((i + 1) + ". " + top.data.getName() + " | Rating: " + top.priority);
         }
     }
+
     
     public void OrdersBetweenDates(String start, String end) {
         System.out.println("Orders between " + start + " and " + end + ":");
-        if (orders.empty()) return;
+
+        if (orders.empty()) {
+            System.out.println("No orders available.");
+            return;
+        }
+
+        boolean found = false;
         orders.findFirst();
-        do {
+        while (!orders.last()) {
             Order o = orders.retrieve();
             if (o.getOrderDate().compareTo(start) >= 0 &&
                 o.getOrderDate().compareTo(end) <= 0) {
-            	System.out.println("- Order ID: " + o.getId() + "\n- Customer: " + o.getCustomerId() + "\n- Total: " + o.getTotalPrice() +
-                        "\n- Date: " + o.getOrderDate() + "\n- Status: " + o.getStatus());
+
+                System.out.println("- Order ID: " + o.getId());
+                System.out.println("- Customer: " + o.getCustomerId());
+                System.out.println("- Total: " + o.getTotalPrice());
+                System.out.println("- Date: " + o.getOrderDate());
+                System.out.println("- Status: " + o.getStatus());
+                System.out.println("-------------------");
+                found = true;
             }
-            if (!orders.last()) orders.findNext();
-        } while (!orders.last());
-        System.out.println("No orders found between these dates.");
+            orders.findNext();
+        }
+        Order o = orders.retrieve();
+        if (o.getOrderDate().compareTo(start) >= 0 &&
+            o.getOrderDate().compareTo(end) <= 0) {
+
+            System.out.println("- Order ID: " + o.getId());
+            System.out.println("- Customer: " + o.getCustomerId());
+            System.out.println("- Total: " + o.getTotalPrice());
+            System.out.println("- Date: " + o.getOrderDate());
+            System.out.println("- Status: " + o.getStatus());
+            System.out.println("-------------------");
+            found = true;
+        }
+
+        if (!found) {
+            System.out.println("No orders found between these dates.");
+        }
     }
 
     
@@ -518,26 +600,34 @@ public class DataHandle {
         LinkedList<String> common = new LinkedList<>();
 
         if (reviews.empty()) {
-        	return;
-        	}
+            System.out.println("No reviews available.");
+            return;
+        }
+
         reviews.findFirst();
-        do {
+        while (!reviews.last()) {
             Review r = reviews.retrieve();
             if ((r.getCustomerId().equals(c1) || r.getCustomerId().equals(c2)) && r.getRating() > 4) {
                 common.insert(r.getProductId());
             }
-            if (!reviews.last()) reviews.findNext();
-        } while (!reviews.last());
+            reviews.findNext();
+        }
+        Review r = reviews.retrieve();
+        if ((r.getCustomerId().equals(c1) || r.getCustomerId().equals(c2)) && r.getRating() > 4) {
+            common.insert(r.getProductId());
+        }
 
         System.out.println("Common Products reviewed > 4 stars by customers " + c1 + " & " + c2 + ":");
+
         if (common.empty()) {
-        	System.out.println("None found.");}
-        else {
+            System.out.println("None found.");
+        } else {
             common.findFirst();
-            do {
+            while (!common.last()) {
                 System.out.println("- Product ID: " + common.retrieve());
-                if (!common.last()) common.findNext();
-            } while (!common.last());
+                common.findNext();
+            }
+            System.out.println("- Product ID: " + common.retrieve());
         }
     }
     
