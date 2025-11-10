@@ -30,7 +30,7 @@ public class DataHandle {
     
     
     private void loadProducts() {
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\UNI\\JavaWorkShop\\ECommerceManagmentSystem\\src\\main\\products.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("products.csv"))) {
             String line;
             br.readLine(); // tis will skip the the titles of each column 
             while ((line = br.readLine()) != null) {
@@ -46,7 +46,7 @@ public class DataHandle {
     }
     
     private void loadCustomers() {
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\UNI\\JavaWorkShop\\ECommerceManagmentSystem\\src\\main\\customers.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("customers.csv"))) {
             String line;
             br.readLine();
             while ((line = br.readLine()) != null) {
@@ -63,7 +63,7 @@ public class DataHandle {
     
     
     private void loadOrders() {
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\UNI\\JavaWorkShop\\ECommerceManagmentSystem\\src\\main\\orders.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("orders.csv"))) {
             String line;
             br.readLine();
             while ((line = br.readLine()) != null) {
@@ -80,7 +80,7 @@ public class DataHandle {
     
     
     private void loadReviews() {
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\UNI\\JavaWorkShop\\ECommerceManagmentSystem\\src\\main\\reviews.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("reviews.csv"))) {
             String line;
             br.readLine();
             while ((line = br.readLine()) != null) {
