@@ -1,8 +1,8 @@
-
+package main;
 
 public class LinkedPQ<T> {
 
-   
+
     class PQNode<T> {
         public T data;
         public float priority;
@@ -83,4 +83,6 @@ public class LinkedPQ<T> {
     public int size() {
         return size;
     }
+
 }
+
