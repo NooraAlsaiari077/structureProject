@@ -1,3 +1,5 @@
+package main;
+
 public class LinkedList<T> {
 
     class Node<T> {
@@ -17,38 +19,40 @@ public class LinkedList<T> {
 
     private Node<T> head;
     private Node<T> current;
-    private int size;
+
 
     public LinkedList() {
         head = current = null;
-        size = 0;
+
     }
 
     public boolean empty() {
         return head == null;
     }
 
-    public void findFirst() {
+    public boolean findFirst() {
+        if (empty()) return false;
         current = head;
+        return true;
     }
 
+   
     public void findNext() {
         if (current != null)
             current = current.next;
     }
 
+
     public T retrieve() {
-        return (current != null) ? current.data : null;
+        if (current == null) {
+        	return null;
+        }
+        return current.data;
     }
 
-    public void update(T val) {
-        if (current != null)
-            current.data = val;
-    }
 
     public void insert(T val) {
         Node<T> newNode = new Node<>(val);
-
         if (empty()) {
             head = current = newNode;
         } else {
@@ -56,7 +60,6 @@ public class LinkedList<T> {
             current.next = newNode;
             current = newNode;
         }
-        size++;
     }
 
     public void remove() {
@@ -71,22 +74,37 @@ public class LinkedList<T> {
                 tmp = tmp.next;
             tmp.next = current.next;
         }
-
-        current = (current.next == null) ? head : current.next;
-        size--;
+        if (current.next == null) {
+        	current=head;
+        }else {
+        	current=current.next;
+        }
     }
 
-    public void print() {
-        if (head == null) {
-            System.out.println("Empty data");
-            return;
+  
+    public boolean last() {
+        if (empty() || current == null) {
+        	return false;
         }
+        
+        return (current.next == null);
+    }
 
-        Node<T> tmp = head;
-        while (tmp != null) {
-            System.out.print(tmp.data + "  ");
-            tmp = tmp.next;
+    
+    public void update(T val) {
+        if (current != null) {
+        	current.data = val;
         }
-        System.out.println();
+    }
+
+    // --- Traverse length (optional) ---
+    public int size() {
+        int count = 0;
+        Node temp = head;
+        while (temp != null) {
+            count++;
+            temp = temp.next;
+        }
+        return count;
     }
 }
