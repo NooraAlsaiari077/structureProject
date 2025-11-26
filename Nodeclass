@@ -1,0 +1,12 @@
+public class AVLNode<T> {
+   public int key
+   public T data;
+   public Balance bal;    // Balance is enum (+1, 0, -1)
+   public AVLNode<T> left, right;
+   
+   public AVLNode(int key, T data) {
+       this.key = key;
+       this.data = data;
+       bal = Balance.Zero;
+       left = right = null;
+   }
