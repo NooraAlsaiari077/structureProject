@@ -13,6 +13,12 @@ public class Product {
         this.price = price;
         this.stock = stock;
     }
+    
+    public AVL<Review> reviewsAVL = new AVL<>();
+
+    public int getReviewCount() {
+        return reviewsAVL.toArrayList().size();
+    }
 
 
     public void addReview(Review r) {
@@ -74,4 +80,5 @@ public class Product {
                 ", Price=" + price + ", Stock=" + stock + " }";
     }
 }
+
 
