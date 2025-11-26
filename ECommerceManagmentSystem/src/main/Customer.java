@@ -13,7 +13,7 @@ public class Customer {
         this.name = name;
         this.email = email;
     }
-
+  public AVL<Order> ordersAVL = new AVL<>();
 
     public void addOrder(Order o) {
     orders.insert(o);
@@ -65,4 +65,5 @@ public class Customer {
         return "Customer ID=" + id + ", Name=" + name + ", Email=" + email;
     }
 }
+
 
