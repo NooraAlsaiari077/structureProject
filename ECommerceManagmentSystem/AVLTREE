@@ -1,449 +1,223 @@
-package projectFiles;
+package main;
+import java.util.ArrayList;
 
+public class AVL <T> {
+	
+	AVLNode<T> root, current;
 
-public class AVL<T> {
-
-    AVLNode<T> root, current;
-    
-    /** Creates a new instance of AVL */
     public AVL() {
         root = current = null;
     }
-    
+
     public boolean empty() {
         return root == null;
     }
-    
-    public boolean full() {
-        return false;
-    }
-    
+
     public T retrieve() {
-        return current.data;
+        return current != null ? current.data : null;
     }
-    
-    public boolean update(int key, T data) {
-        remove_key(current.key);
-        return insert(key, data);
+
+    // -------- HEIGHT / BALANCE --------
+
+    private int getHeight(AVLNode<T> n) {
+        return (n == null) ? 0 : n.height;
     }
-    
-    public void deleteSubtree() {
-        if(current == root) {
-            current = root = null;
-        }
-        else {
-            AVLNode<T> p = current;
-            find(Relative.Parent);
-            if(current.left == p)
-                current.left = null;
-            else 
-                current.right = null;
-            current = root;
-        }
+
+    private void updateHeight(AVLNode<T> n) {
+        n.height = 1 + Math.max(getHeight(n.left), getHeight(n.right));
     }
-    
-    public boolean find(Relative rel) {
-        switch (rel) {
-           case Root:    // Easy case
-            current = root;
-            return true;
-           case Parent:
-            if(current == root)
-                return false;
-            current = findparent(current, root);
-            return true;
-           case LeftChild:
-            if(current.left == null)
-                return false;
-            current = current.left;
-            return true;
-           case RightChild:
-            if(current.right == null)
-                return false;
-            current = current.right;
-            return true;
-           default:
-            return false;
-        }
+
+    private int getBalance(AVLNode<T> n) {
+        return (n == null) ? 0 : getHeight(n.left) - getHeight(n.right);
     }
-    
-    private AVLNode<T> findparent(AVLNode<T> p, AVLNode<T> t) {
-        if(t == null)
-            return null;    // empty tree
-        if(t.right == null && t.left == null)
-            return null;
-        else if(t.right == p || t.left == p)
-            return t;    // parent is t
-        else {
-            AVLNode<T> q = findparent(p, t.left);
-            if (q != null)
-                return q;
-            else
-                return findparent(p, t.right);
-        }
-    }
-    
-    // ========== HEIGHT & BALANCE METHODS ==========
-    
-    private int getHeight(AVLNode<T> node) {
-        if (node == null) return 0;
-        return node.height;
-    }
-    
-    private int getBalanceFactor(AVLNode<T> node) {
-        if (node == null) return 0;
-        return getHeight(node.left) - getHeight(node.right);
-    }
-    
-    private void updateHeight(AVLNode<T> node) {
-        if (node != null) {
-            node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
-        }
-    }
-    
-    // ========== ROTATION METHODS ==========
-    
-    /**
-     * Right rotation for Left-Left case
-     */
+
+    // -------- ROTATIONS --------
+
     private AVLNode<T> rightRotate(AVLNode<T> y) {
         AVLNode<T> x = y.left;
         AVLNode<T> T2 = x.right;
-        
-        // Perform rotation
+
         x.right = y;
         y.left = T2;
-        
-        // Update heights
+
         updateHeight(y);
         updateHeight(x);
-        
-        return x;  // New root
+
+        return x;
     }
-    
-    /**
-     * Left rotation for Right-Right case
-     */
+
     private AVLNode<T> leftRotate(AVLNode<T> x) {
         AVLNode<T> y = x.right;
         AVLNode<T> T2 = y.left;
-        
-        // Perform rotation
+
         y.left = x;
         x.right = T2;
-        
-        // Update heights
+
         updateHeight(x);
         updateHeight(y);
-        
-        return y;  // New root
+
+        return y;
     }
-    
-    // ========== SEARCH METHOD ==========
-    
+
+    // -------- FIND --------
+
     public boolean findkey(int tkey) {
         AVLNode<T> p = root, q = root;
-        if(empty())
-            return false;    
-        while(p != null) {
+        if (empty()) return false;
+
+        while (p != null) {
             q = p;
-            if(p.key == tkey) {
+            if (p.key == tkey) {
                 current = p;
                 return true;
-            }
-            else if(tkey < p.key)
+            } else if (tkey < p.key)
                 p = p.left;
             else
                 p = p.right;
-        }    
+        }
+
         current = q;
         return false;
     }
-    
-    // ========== INSERT METHOD (AVL-BALANCED) ==========
-    
-    public boolean insert(int k, T val) {
-        if (findkey(k)) {
-            return false;  // Key already exists
-        }
-        
-        root = insertRecursive(root, k, val);
-        findkey(k);  // Set current to inserted node
+
+    // -------- INSERT --------
+
+    public boolean insert(int key, T val) {
+        if (findkey(key)) return false;
+        root = insertRec(root, key, val);
+        findkey(key);
         return true;
     }
-    
-    private AVLNode<T> insertRecursive(AVLNode<T> node, int key, T value) {
-        // 1. Perform normal BST insertion
-        if (node == null) {
-            return new AVLNode<>(key, value);
-        }
-        
-        if (key < node.key) {
-            node.left = insertRecursive(node.left, key, value);
-        } else if (key > node.key) {
-            node.right = insertRecursive(node.right, key, value);
-        } else {
-            // Duplicate key - update value
+
+    private AVLNode<T> insertRec(AVLNode<T> node, int key, T value) {
+        if (node == null) return new AVLNode<>(key, value);
+
+        if (key < node.key)
+            node.left = insertRec(node.left, key, value);
+        else if (key > node.key)
+            node.right = insertRec(node.right, key, value);
+        else {
             node.data = value;
             return node;
         }
-        
-        // 2. Update height of ancestor node
+
         updateHeight(node);
-        
-        // 3. Get balance factor
-        int balance = getBalanceFactor(node);
-        
-        // 4. If unbalanced, perform rotations
-        
-        // Left-Left Case
-        if (balance > 1 && key < node.left.key) {
+        int balance = getBalance(node);
+
+        // LL
+        if (balance > 1 && key < node.left.key)
             return rightRotate(node);
-        }
-        
-        // Right-Right Case
-        if (balance < -1 && key > node.right.key) {
+
+        // RR
+        if (balance < -1 && key > node.right.key)
             return leftRotate(node);
-        }
-        
-        // Left-Right Case
+
+        // LR
         if (balance > 1 && key > node.left.key) {
             node.left = leftRotate(node.left);
             return rightRotate(node);
         }
-        
-        // Right-Left Case
+
+        // RL
         if (balance < -1 && key < node.right.key) {
             node.right = rightRotate(node.right);
             return leftRotate(node);
         }
-        
-        return node;  // Return unchanged node
+
+        return node;
     }
-    
-    // ========== DELETE METHOD (AVL-BALANCED) ==========
-    
-    public boolean remove_key(int tkey) {
-        BooleanWrapper removed = new BooleanWrapper(false);
-        root = removeRecursive(root, tkey, removed);
+
+    // -------- DELETE --------
+
+    public boolean remove_key(int key) {
+        root = deleteRec(root, key);
         current = root;
-        return removed.getValue();
+        return true;
     }
-    
-    private AVLNode<T> removeRecursive(AVLNode<T> node, int key, BooleanWrapper flag) {
-        // 1. Perform standard BST delete
-        if (node == null) {
-            return null;
-        }
-        
-        if (key < node.key) {
-            node.left = removeRecursive(node.left, key, flag);
-        } else if (key > node.key) {
-            node.right = removeRecursive(node.right, key, flag);
-        } else {
-            // Node to delete found
-            flag.setValue(true);
-            
-            // Node with one or no child
+
+    private AVLNode<T> deleteRec(AVLNode<T> node, int key) {
+        if (node == null) return null;
+
+        if (key < node.key)
+            node.left = deleteRec(node.left, key);
+        else if (key > node.key)
+            node.right = deleteRec(node.right, key);
+        else {
+            // leaf or one child
             if (node.left == null || node.right == null) {
                 AVLNode<T> temp = (node.left != null) ? node.left : node.right;
-                
-                if (temp == null) {
-                    temp = node;
-                    node = null;
-                } else {
-                    node = temp;  // Copy contents
-                }
+                if (temp == null)
+                    return null;
+                else
+                    node = temp;
             } else {
-                // Node with two children: get inorder successor
-                AVLNode<T> temp = findMin(node.right);
+                // two children: inorder successor
+                AVLNode<T> temp = node.right;
+                while (temp.left != null) temp = temp.left;
+
                 node.key = temp.key;
                 node.data = temp.data;
-                node.right = removeRecursive(node.right, temp.key, new BooleanWrapper(false));
+
+                node.right = deleteRec(node.right, temp.key);
             }
         }
-        
-        if (node == null) {
-            return null;
-        }
-        
-        // 2. Update height
+
+        if (node == null) return null;
+
         updateHeight(node);
-        
-        // 3. Get balance factor
-        int balance = getBalanceFactor(node);
-        
-        // 4. Rebalance if needed
-        
-        // Left-Left Case
-        if (balance > 1 && getBalanceFactor(node.left) >= 0) {
+        int balance = getBalance(node);
+
+        // LL
+        if (balance > 1 && getBalance(node.left) >= 0)
             return rightRotate(node);
-        }
-        
-        // Left-Right Case
-        if (balance > 1 && getBalanceFactor(node.left) < 0) {
+
+        // LR
+        if (balance > 1 && getBalance(node.left) < 0) {
             node.left = leftRotate(node.left);
             return rightRotate(node);
         }
-        
-        // Right-Right Case
-        if (balance < -1 && getBalanceFactor(node.right) <= 0) {
+
+        // RR
+        if (balance < -1 && getBalance(node.right) <= 0)
             return leftRotate(node);
-        }
-        
-        // Right-Left Case
-        if (balance < -1 && getBalanceFactor(node.right) > 0) {
+
+        // RL
+        if (balance < -1 && getBalance(node.right) > 0) {
             node.right = rightRotate(node.right);
             return leftRotate(node);
         }
-        
+
         return node;
     }
-    
-    private AVLNode<T> findMin(AVLNode<T> p) {
-        if (p == null) return null;
-        while (p.left != null) {
-            p = p.left;
-        }
-        return p;
+
+    // -------- INORDER TO ARRAYLIST --------
+
+    public ArrayList<T> toArrayList() {
+        ArrayList<T> list = new ArrayList<>();
+        inorderFill(root, list);
+        return list;
     }
-    
-    // ========== ADDITIONAL METHODS (Same as BST) ==========
-    
-    /**
-     * In-order traversal: returns all values in sorted order
-     * Time Complexity: O(n)
-     */
-    public DLL<T> inOrderTraversal() {
-        DLL<T> result = new DLL<>();
-        inOrderRecursive(root, result);
+
+    private void inorderFill(AVLNode<T> node, ArrayList<T> list) {
+        if (node == null) return;
+        inorderFill(node.left, list);
+        list.add(node.data);
+        inorderFill(node.right, list);
+    }
+
+    // -------- RANGE QUERY --------
+
+    public ArrayList<T> rangeQuery(int min, int max) {
+        ArrayList<T> result = new ArrayList<>();
+        rangeRec(root, min, max, result);
         return result;
     }
-    
-    private void inOrderRecursive(AVLNode<T> node, DLL<T> result) {
+
+    private void rangeRec(AVLNode<T> node, int min, int max, ArrayList<T> result) {
         if (node == null) return;
-        inOrderRecursive(node.left, result);
-        result.insert(node.data);
-        inOrderRecursive(node.right, result);
+        if (node.key > min) rangeRec(node.left, min, max, result);
+        if (node.key >= min && node.key <= max) result.add(node.data);
+        if (node.key < max) rangeRec(node.right, min, max, result);
     }
-    
-    /**
-     * Search for a value by key
-     * Time Complexity: O(log n) - guaranteed worst case
-     */
-    public T search(int key) {
-        if (findkey(key)) {
-            return current.data;
-        }
-        return null;
-    }
-    
-    /**
-     * Delete a node by key (wrapper for remove_key)
-     * Time Complexity: O(log n) - guaranteed worst case
-     */
-    public boolean delete(int key) {
-        return remove_key(key);
-    }
-    
-    /**
-     * Get number of nodes in tree
-     * Time Complexity: O(n)
-     */
-    public int getSize() {
-        return countNodesInSubtree(root);
-    }
-    
-    private int countNodesInSubtree(AVLNode<T> node) {
-        if (node == null) return 0;
-        return 1 + countNodesInSubtree(node.left) + countNodesInSubtree(node.right);
-    }
-    
-    /**
-     * Get all keys in sorted order
-     * Time Complexity: O(n)
-     */
-    public DLL<Integer> getKeysSorted() {
-        DLL<Integer> result = new DLL<>();
-        getKeysRecursive(root, result);
-        return result;
-    }
-    
-    private void getKeysRecursive(AVLNode<T> node, DLL<Integer> result) {
-        if (node == null) return;
-        getKeysRecursive(node.left, result);
-        result.insert(node.key);
-        getKeysRecursive(node.right, result);
-    }
-    
-    /**
-     * Range query: return all values where minKey <= key <= maxKey
-     * Time Complexity: O(log n + k) where k is number of results
-     */
-    public DLL<T> rangeQuery(int minKey, int maxKey) {
-        DLL<T> result = new DLL<>();
-        rangeQueryRecursive(root, minKey, maxKey, result);
-        return result;
-    }
-    
-    private void rangeQueryRecursive(AVLNode<T> node, int minKey, int maxKey, DLL<T> result) {
-        if (node == null) return;
-        
-        // If current key > minKey, explore left subtree
-        if (node.key > minKey) {
-            rangeQueryRecursive(node.left, minKey, maxKey, result);
-        }
-        
-        // If current key is in range, add it
-        if (node.key >= minKey && node.key <= maxKey) {
-            result.insert(node.data);
-        }
-        
-        // If current key < maxKey, explore right subtree
-        if (node.key < maxKey) {
-            rangeQueryRecursive(node.right, minKey, maxKey, result);
-        }
-    }
-    
-    /**
-     * Get all values (unordered)
-     * Time Complexity: O(n)
-     */
-    public DLL<T> getAllValues() {
-        return inOrderTraversal();
-    }
-    
-    /**
-     * Find minimum value in tree
-     * Time Complexity: O(log n) - guaranteed worst case
-     */
-    public T findMin() {
-        if (root == null) {
-            return null;
-        }
-        AVLNode<T> node = findMin(root);
-        return node.data;
-    }
-    
-    /**
-     * Find maximum value in tree
-     * Time Complexity: O(log n) - guaranteed worst case
-     */
-    public T findMax() {
-        if (root == null) {
-            return null;
-        }
-        AVLNode<T> node = root;
-        while (node.right != null) {
-            node = node.right;
-        }
-        return node.data;
-    }
-    
-    @Override
-    public String toString() {
-        return "AVL[size=" + getSize() + ", root=" + (root != null ? root.key : "null") + "]";
-    }
+
 }
-
-
