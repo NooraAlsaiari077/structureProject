@@ -147,30 +147,102 @@ public class DataHandleAVL {
         if (ordersAVL.findkey(key)) return ordersAVL.retrieve();
         return null;
     }
+    
+    
+    // ADD PRODUCT^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public void addProducts(Product p) {
+    	
+       	if (findProductById(p.getId()) != null) {
+    	    System.out.println("Product already exists");
+    	    return;
+    	}
 
+        int key = Integer.parseInt(p.getId());
 
-    //PRODUCTS IN A PRICE RANGE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    public void listProductsInPriceRange(double min, double max) {
-        ArrayList<Product> list = productsAVL.toArrayList();
-
-        System.out.println("Products within price range:");
-        for (Product p : list) {
-            if (p.getPrice() >= min && p.getPrice() <= max)
-                System.out.println(p);
+        productsAVL.insert(key, p);
+        System.out.println("Product added: " + p.getName());
+    }
+    
+    
+    // UPDATE PRODUCT^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public void updateProducts(int productId, double price, int stock) {
+        if (!productsAVL.findkey(productId)) {
+            System.out.println("No product found with that ID");
+            return;
         }
+
+        Product p = productsAVL.retrieve();
+        p.setPrice(price);
+        p.setStock(stock);
+
+        System.out.println("Product updated successfully: " + p.getName());
+    }
+    
+    // REMOVE PRODUCT^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public void removeProduct(String productId) {
+
+        if (productsAVL.empty()) {
+            System.out.println("No products found.");
+            return;
+        }
+
+       	if (findProductById(productId) != null) {
+    	    System.out.println("Product already exists");
+    	    return;
+    	}
+
+       	int key = Integer.parseInt(productId);
+        productsAVL.remove_key(key);
+        System.out.println("Product removed successfully.");
     }
 
 
-    //ORDERS BETWEEN DATES^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    public void listOrdersBetweenDates(String start, String end) {
-        ArrayList<Order> list = ordersAVL.toArrayList();
 
-        System.out.println("Orders between dates:");
-        for (Order o : list) {
-            if (o.getOrderDate().compareTo(start) >= 0 &&
-                o.getOrderDate().compareTo(end) <= 0)
-                System.out.println(o);
+
+
+    //PRODUCTS IN A PRICE RANGE using RECURSION^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public void listProductsInPriceRange(double min, double max) {
+        System.out.println("Products within price range:");
+        rangePrint(productsAVL.root, min, max);
+    }
+
+    private void rangePrint(AVLNode<Product> node, double min, double max) {
+        if (node == null) return;
+
+        rangePrint(node.left, min, max);
+
+        if (node.data.getPrice() >= min && node.data.getPrice() <= max)
+            System.out.println(node.data);
+
+        rangePrint(node.right, min, max);
+    }
+
+    
+    //INSERT NEW CUSTOMER^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
+    
+    private int getNameKey(String name) {
+        name = name.toLowerCase();
+
+        int first = name.charAt(0);
+        int second = (name.length() > 1 ? name.charAt(1) : 0);
+        return first * 1000 + second * 10;
+    }
+
+    public void registerCustomer(Customer customer) {
+
+        if (findCustomerById(customer.getId()) != null) {
+            System.out.println("Customer already exists in the system");
+            return;
         }
+
+        int key = Integer.parseInt(customer.getId());
+        customersAVL.insert(key, customer);
+
+        int nameKey = getNameKey(customer.getName());
+        customersByNameAVL.insert(nameKey, customer);
+
+
+        System.out.println("New customer registered: " + customer.getName());
     }
 
 
@@ -201,8 +273,28 @@ public class DataHandleAVL {
                 System.out.println(c + " | Rating: " + r.getRating());
         }
     }
+    
+    //ORDERS BETWEEN DATES using IN ORDER TRAVERSAL^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public void listOrdersBetweenDates(String start, String end) {
+        System.out.println("Orders between " + start + " and " + end + ":");
+        listOrdersBetweenDatesRec(ordersAVL.root, start, end);
+    }
 
-    // TOP 3 MOST REVIEWED PRODUCTS using RECURSIVE^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    private void listOrdersBetweenDatesRec(AVLNode<Order> node, String start, String end) {
+        if (node == null) return;
+
+        listOrdersBetweenDatesRec(node.left, start, end);
+        
+        Order o = node.data;
+        if (o.getOrderDate().compareTo(start) >= 0 &&
+            o.getOrderDate().compareTo(end) <= 0) {
+            System.out.println(o);
+        }
+
+        listOrdersBetweenDatesRec(node.right, start, end);
+    }
+
+    // TOP 3 MOST REVIEWED PRODUCTS using RECURSION^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     // --- helper class
     private class TopThree {
